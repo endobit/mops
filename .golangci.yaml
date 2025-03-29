@@ -1,0 +1,80 @@
+version: "2"
+linters:
+  enable:
+    - asciicheck
+    - bodyclose
+    - copyloopvar
+    - dogsled
+    - errname
+    - errorlint
+    - forcetypeassert
+    - gocognit
+    - gocritic
+    - gocyclo
+    - goprintffuncname
+    - gosec
+    - importas
+    - makezero
+    - misspell
+    - nakedret
+    - nestif
+    - nilerr
+    - nolintlint
+    - predeclared
+    - revive
+    - staticcheck
+    - rowserrcheck
+    - tagliatelle
+    - unconvert
+    - unparam
+    - wastedassign
+  disable:
+    - unused
+  settings:
+    errorlint:
+      errorf: true
+    gocognit:
+      min-complexity: 50
+    gocritic:
+      disabled-checks:
+        - whyNoLint
+        - commentedOutCode
+      enabled-tags:
+        - diagnostic
+        - experimental
+        - opinionated
+        - performance
+        - style
+    gosec:
+      excludes:
+        - G204
+    misspell:
+      locale: US
+    nolintlint:
+      require-explanation: false
+      require-specific: true
+    tagliatelle:
+      case:
+        rules:
+          json: snake
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gofmt
+    - goimports
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

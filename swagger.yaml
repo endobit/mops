@@ -1,0 +1,18 @@
+consumes:
+- application/json
+host: localhost:8080
+info:
+  contact: {}
+  title: Metal Operations Server
+  version: "1"
+paths:
+  /report/{name}:
+    get:
+      description: Renders a report from the named template.
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+      summary: report template
+swagger: "2.0"

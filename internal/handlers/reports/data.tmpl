@@ -1,0 +1,93 @@
+{{ define "attrs" -}}
+  Attrs
+  {{- range $key, $value := . }}
+    {{ $key }}
+    Type {{ .Type }}
+	Value {{ .Value }}
+  {{ end }}
+{{- end -}}
+
+{{ define "hosts" -}}
+Hosts
+  Zone {{ .Zone }}
+  Cluser {{ .Cluster }}
+  Name {{ .Name }}
+  {{ template "attrs" .Attrs }}
+  Make {{ .Make }}
+  Model {{ .Model }}
+  Environment {{ .Environment }}
+  Appliance {{ .Appliance }}
+  Location {{ .Location }}
+  Rack {{ .Rack }}
+  Rank {{ .Rank }}
+  Slot {{ .Slot }}
+  Architecture {{ .Architecture }}
+  Interfaces
+  {{- range .Interfaces }}
+    Zone {{ .Zone }}
+	Cluster {{ .Cluster }}
+	Host {{ .Host }}
+	Name {{ .Name }}
+	MAC {{ .MAC }}
+	Netmask {{ .Netmask }}
+	IsDHCP {{ .IsDHCP }}
+	IsPXE {{ .IsPXE }}
+	IsManagement {{ .IsManagement }}
+	Type {{ .Type }}
+	BondMond {{ .BondMode }}
+	MasterInterface {{ .MasterInterface }}
+	Network {{ .Network }}
+  {{ end }}
+{{ end -}}
+
+Makes 
+{{- range .Makes }}
+  {{ .Name }}
+{{- end }}
+
+Zones
+{{- range .Zones }}
+  Name {{ .Name }}
+  TimeZone {{ .TimeZone }}
+  {{ template "attrs" .Attrs }}
+  Networks
+  {{- range .Networks }}
+    Zone {{ .Zone }}
+    Name {{ .Name }}
+    Address {{ .Address }}
+    Gateway {{ .Gateway }}
+    IsPXE {{ .IsPXE }}
+    MTU {{ .MTU }}
+  {{ end }}
+  Appliances
+  {{- range .Appliances }}
+    Zone {{ .Zone }}
+    Name {{ .Name }}
+    {{ template "attrs" .Attrs }}
+  {{- end }}
+  Environments
+  {{- range .Environments }}
+    Zone {{ .Zone }}
+    Name {{ .Name }}
+    {{ template "attrs" .Attrs }}
+  {{- end }}
+  Racks
+  {{- range .Racks }}
+    Zone {{ .Zone }}
+    Name {{ .Name }}
+    {{ template "attrs" .Attrs }}
+  {{- end }}
+  Hosts
+  {{- range .Hosts }}
+{{ include "hosts" . | indent 2 }}
+  {{- end }}
+  Clusters
+  {{- range .Clusters }}
+    Zone {{ .Zone }}
+    Name {{ .Name }}
+    {{ template "attrs" .Attrs }}
+    {{- range .Hosts }}
+{{ include "hosts" . | indent 4 }}
+    {{- end }}
+  {{- end }}
+{{- end }}
