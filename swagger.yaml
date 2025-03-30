@@ -1,6 +1,12 @@
 consumes:
 - application/json
-host: localhost:8080
+definitions:
+  mops.GetReportResponse:
+    properties:
+      report:
+        type: string
+    type: object
+host: localhost:8888
 info:
   contact: {}
   title: Metal Operations Server
@@ -11,8 +17,8 @@ paths:
       description: Renders a report from the named template.
       responses:
         "200":
-          description: OK
+          description: report response
           schema:
-            type: string
+            $ref: '#/definitions/mops.GetReportResponse'
       summary: report template
 swagger: "2.0"

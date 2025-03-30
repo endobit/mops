@@ -35,7 +35,7 @@ type Reporter struct {
 //	@Parm			zone    query string false "zone name"
 //	@Parm			cluster query string false "cluster name"
 //	@Parm			host    query string false "host name"
-//	@Success		200	{object}	json
+//	@Success		200	{object}	mops.GetReportResponse "report response"
 //	@Router			/report/{name} [get]
 func (r *Reporter) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	if !r.initialized {
