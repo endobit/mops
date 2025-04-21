@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/fs"
 	"log/slog"
+	"net"
 	"net/http"
 	"strings"
 	"text/template"
@@ -115,15 +116,7 @@ func (r *Reporter) report(scope mops.ReportScope, template string) ([]byte, erro
 }
 
 func (r *Reporter) init() error {
-	tmpl := template.New("mops")
-
-	funcs := sprig.TxtFuncMap()
-	funcs["include"] = func(name string, data any) (string, error) {
-		var buf strings.Builder
-
-		err := tmpl.ExecuteTemplate(&buf, name, data)
-		return buf.String(), err
-	}
+	tmpl := addFunctions(template.New("mops"))
 
 	repfs, err := fs.Sub(reports, "reports")
 	if err != nil {
@@ -134,7 +127,7 @@ func (r *Reporter) init() error {
 		return err
 	}
 
-	tmpl, err = tmpl.Funcs(funcs).ParseFS(repfs, "*.tmpl")
+	tmpl, err = tmpl.ParseFS(repfs, "*.tmpl")
 	if err != nil {
 		return fmt.Errorf("failed to parse template: %w", err)
 	}
@@ -156,4 +149,46 @@ func logFiles(fsys fs.FS, logger *slog.Logger) error {
 		}
 		return nil
 	})
+}
+
+func addFunctions(tmpl *template.Template) *template.Template {
+	funcs := sprig.TxtFuncMap()
+	funcs["include"] = includeTemplate(tmpl)
+	funcs["netmask"] = cidrNetmask
+	funcs["address"] = cidrAddress
+
+	return tmpl.Funcs(funcs)
+}
+
+// includeTemplate evaluates the named template with the provided data and returns the result as a string.
+func includeTemplate(tmpl *template.Template) func(name string, data any) (string, error) {
+	// The closure captures the template instance so it can be used inside the
+	// template engine. I think Helm does the same thing (and also calls the
+	// function include).
+	return func(name string, data any) (string, error) {
+		var buf strings.Builder
+
+		err := tmpl.ExecuteTemplate(&buf, name, data)
+		return buf.String(), err
+	}
+}
+
+func cidrAddress(cidr string) (string, error) {
+	ip, _, err := net.ParseCIDR(cidr)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse CIDR %q: %w", cidr, err)
+	}
+
+	return ip.String(), nil
+}
+
+func cidrNetmask(cidr string) (string, error) {
+	_, ipnet, err := net.ParseCIDR(cidr)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse CIDR %q: %w", cidr, err)
+	}
+
+	mask := net.IP(ipnet.Mask).String()
+
+	return mask, nil
 }

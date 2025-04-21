@@ -1,0 +1,54 @@
+{{- define "host" }}
+{{- $host := index . "host" }}
+{{- $zone := index . "zone" }}
+{{- $cluster := index . "cluster" }}
+grains:
+  zone: {{ $zone.Name }}
+  timezone: {{ $zone.TimeZone }}
+    {{- if $cluster }}
+  cluster: {{ $cluster.Name }}
+    {{- end }}
+  hostname: {{  $host.Name }}
+  make: {{ $host.Make }}
+  model: {{ $host.Model }}
+  environment: {{ $host.Environment }}
+  appliance: {{ $host.Appliance }}
+  rack: {{ $host.Rack }}
+  rank: {{ $host.Rank }}
+  slot: {{ $host.Slot }}
+  type: {{ $host.Type }}
+  interfaces:
+    {{- range  $host.Interfaces }}
+  - name: {{ .Name }}
+    ip: {{ .IP }}
+    mac: {{ .MAC }}
+    dhcp: {{ .IsDHCP }}
+    pxe: {{ .IsPXE }}
+    management: {{ .IsManagement }}
+    type: {{ .Type }}
+    bond_mode: {{ .BondMode }}
+    master: {{ .MasterInterface }}
+	    {{- if .Network }}
+	        {{- if .Network.CIDR }}
+    cidr: {{ .Network.CIDR }}
+    network: {{ address .Network.CIDR }}
+    netmask: {{ netmask .Network.CIDR }}
+     		{{- end }}
+    gateway: {{ .Network.Gateway }}
+    mtu: {{ .Network.MTU }}
+        {{- end }}
+    {{- end }}
+{{- end }}
+
+{{- range .Zones }}
+    {{ $zone := . }}
+    {{- range .Hosts }}
+{{ template "host" (dict "zone" $zone "host" .) }}
+    {{- end }}
+	{{- range .Clusters }}
+	    {{ $cluster := . }}
+	    {{- range .Hosts }}
+{{ template "host" (dict "zone" $zone "cluster" $cluster "host" .) }}
+   		{{- end }}
+    {{- end }}
+{{- end }}
